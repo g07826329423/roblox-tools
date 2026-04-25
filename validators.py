@@ -1,30 +1,34 @@
 import re
-from typing import Any, Dict
 
-def is_non_empty_string(value: Any) -> bool:
-    return isinstance(value, str) and bool(value.strip())
+class InputValidator:
+    def __init__(self, username_pattern: str = r'^[a-zA-Z0-9_]{3,20}$', age_range: tuple = (0, 120)):
+        self.username_pattern = username_pattern
+        self.age_range = age_range
 
+    def validate_username(self, username: str) -> bool:
+        if re.match(self.username_pattern, username):
+            return True
+        raise ValueError(f'Invalid username: {username}')
 
-def is_valid_username(username: str) -> bool:
-    return bool(re.match('^[a-zA-Z0-9]{3,20}$', username))
+    def validate_age(self, age: int) -> bool:
+        if self.age_range[0] <= age <= self.age_range[1]:
+            return True
+        raise ValueError(f'Invalid age: {age}')
 
+    def validate_input(self, username: str, age: int):
+        try:
+            self.validate_username(username)
+            self.validate_age(age)
+            return True
+        except ValueError as e:
+            print(f'Validation error: {e}')
+            return False
 
-def is_positive_number(value: Any) -> bool:
-    return isinstance(value, (int, float)) and value > 0
-
-
-def is_valid_email(email: str) -> bool:
-    return bool(re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email))
-
-
-def validate_user_data(user_data: Dict[str, Any]) -> bool:
-    return (is_non_empty_string(user_data.get('username')) and 
-            is_valid_username(user_data['username']) and 
-            is_non_empty_string(user_data.get('email')) and 
-            is_valid_email(user_data['email']) and 
-            is_positive_number(user_data.get('age', 0)))
-
-
-def validate_item_data(item_data: Dict[str, Any]) -> bool:
-    return (is_non_empty_string(item_data.get('name')) and 
-            is_positive_number(item_data.get('price', 0)))
+if __name__ == '__main__':
+    validator = InputValidator()
+    user_data = [('ValidUser01', 25), ('!nv4lidUser', 130)]
+    for username, age in user_data:
+        if validator.validate_input(username, age):
+            print(f'{username}, {age} is valid')
+        else:
+            print(f'{username}, {age} is invalid')
